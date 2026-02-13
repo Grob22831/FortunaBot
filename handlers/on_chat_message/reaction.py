@@ -4,6 +4,8 @@ from aiogram.types import ReactionTypeEmoji
 from handlers.stb import is_win
 router = Router()
 
+
+#оставляет реакции на слот машину других игроков, если там выигрыш конечно
 @router.message()
 async def reaction(message: types.Message):
     emo = await is_win(message)

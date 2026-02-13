@@ -5,7 +5,7 @@ Stack = []
 
 
 router = Router()
-
+#Команда /start, просто выводит то, что умеет
 #декоратор, показывает к чему привязана функция, или я хз, без него не работает
 @router.message(Command("start"))
 async def start(message: types.Message):
