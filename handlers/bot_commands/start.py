@@ -1,4 +1,3 @@
-import asyncio
 from aiogram.filters import Command
 from aiogram import  Bot, Router, types,F
 Stack = []

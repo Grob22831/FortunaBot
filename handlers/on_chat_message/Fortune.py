@@ -1,12 +1,12 @@
 import logging
 
-from aiogram import F, types
-from aiogram import Router
-from asyncio import sleep, create_task
+from aiogram import F, types,Router
 from aiogram.types import ReactionTypeEmoji
-router = Router()
-from handlers.stb import Dice_time as dt,casino,is_win,remove_time, remove_mes
+from asyncio import sleep, create_task
+from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes
 
+
+router = Router()
 
 @router.message((F.text.lower().split().contains("крутка")) | (F.text.lower().split().contains("лудка")))
 async def fortuna_case_insensitive_handler(message: types.Message):

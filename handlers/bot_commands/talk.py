@@ -3,6 +3,8 @@ from aiogram import types,Router,Bot
 from handlers.stb import  casino_chat
 
 router = Router()
+
+
 #позволяет писать от имени бота в чате в котором присутствует бот
 @router.message(Command("talk"))
 async def bot_talk(message: types.Message,bot:Bot):
