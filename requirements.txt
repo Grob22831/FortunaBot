@@ -1,5 +1,8 @@
 #logging приходит с пайтоном
 #sqlite3
+flask
 asyncio
 aiogram
 emoji
+
+requests

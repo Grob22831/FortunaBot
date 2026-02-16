@@ -3,8 +3,9 @@ from aiogram.types import Update,Message
 import logging
 from collections import defaultdict
 import asyncio
-from handlers.stb import trottling_time as tt, remove_time, remove_mes,check_loot,standart_dep
-from handlers.database import add_user,player_exists
+from handlers.stb import trottling_time as tt, remove_time, remove_mes,standart_dep
+#from handlers.database import add_user,player_exists
+from handlers.database_ip import check_loot,add_user,player_exists
 
 logging.basicConfig(level=logging.INFO)
 

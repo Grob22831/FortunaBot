@@ -1,7 +1,6 @@
 import sqlite3
-conn = sqlite3.connect('members.db')
+conn = sqlite3.connect('../members.db')
 cursor = conn.cursor()
-import  types
 
 #искать в таблице players по user_id
 async def player_exists(user_id):
@@ -51,3 +50,6 @@ async def add_spin(user_id,new_spins):
 async def add_balance(user_id,new_balance):
     cursor.execute("UPDATE Players SET balance = ? WHERE user_id = ?", (new_balance, user_id))
     conn.commit()
+
+
+
