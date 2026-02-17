@@ -1,10 +1,14 @@
-import sqlite3
+import sqlite3,os
 import requests as request
 from aiogram import types
-from handlers.stb import casino
+from handlers.stb import casino, Coefficients
 from flask import jsonify
-from handlers.stb import syte_ip
-syte_url = f"http://{syte_ip}:5000"
+from dotenv import load_dotenv
+
+
+
+load_dotenv()
+syte_url = f"http://{os.getenv("syte_ip")}:5000"
 
 
 
@@ -64,16 +68,16 @@ async def check_loot(message: types.Message,user_id, deposit:int):
         new_balance = await get_balance(user_id)-deposit
         new_spins = await get_spins(user_id)+1
         if int(message.dice.value) == 64:
-            new_balance += deposit * 28
+            new_balance += deposit * Coefficients["777"]
 
         elif int(message.dice.value) == 43:
-            new_balance += deposit*16
+            new_balance += deposit*Coefficients["lll"]
 
         elif int(message.dice.value) == 22:
-            new_balance += deposit*9
+            new_balance += deposit * Coefficients["ggg"]
 
         elif int(message.dice.value) == 1:
-            new_balance += deposit*5
+            new_balance += deposit * Coefficients["bbb"]
         await change_balance(user_id, new_balance)
         await change_spins(user_id, new_spins)
     else:

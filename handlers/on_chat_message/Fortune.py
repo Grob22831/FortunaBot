@@ -1,12 +1,12 @@
 import logging
-
-from aiogram import F, types,Router
+from handlers.database_ip import check_loot
+from aiogram import F, types, Router
 from aiogram.types import ReactionTypeEmoji
 from asyncio import sleep, create_task
-from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes
-
+from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes, standart_dep
 
 router = Router()
+
 
 @router.message((F.text.lower().split().contains("крутка")) | (F.text.lower().split().contains("лудка")))
 async def fortuna_case_insensitive_handler(message: types.Message):
@@ -24,10 +24,10 @@ async def fortuna_case_insensitive_handler(message: types.Message):
         else:
             return
 
-        indexnum = match.index(keyword)
+        index_num = match.index(keyword)
 
         try:
-            num = int(match[indexnum + 1])
+            num = int(match[index_num + 1])
         except (IndexError, ValueError):
             num = 5
 
@@ -48,7 +48,7 @@ async def fortuna_case_insensitive_handler(message: types.Message):
                 ludka = await message.answer_dice(emoji=casino)
             else:
                 ludka = await message.reply_dice(emoji=casino)
-
+            await check_loot(ludka, ludka.from_user.id, standart_dep)
             stack_of_loot.append(ludka)
             await sleep(dt)
 
@@ -75,6 +75,3 @@ async def fortuna_case_insensitive_handler(message: types.Message):
         except Exception as e:
             logging.info(f"Не получилось удалить сообщение: {e}")
             pass
-
-
-

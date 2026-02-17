@@ -1,24 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import sqlite3
+import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "../../members.db")
 app = Flask(__name__)
 def connect_db():
-    connect = sqlite3.connect('../../members.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     return cursor, connect
-def init_db():
-    conn = sqlite3.connect('../../members.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Players (
-            user_id INTEGER PRIMARY KEY,
-            username TEXT,
-            balance INTEGER DEFAULT 0,
-            spins INTEGER DEFAULT 0
-        )
-    ''')
-    conn.commit()
-    conn.close()
 
 #POST
 @app.route("/save", methods=["POST"])
@@ -137,10 +127,18 @@ def get_stats(user_id):
         })
     return jsonify({"error": "User not found"}), 404
 
+@app.route('/')
+def index():
+    cursor, connect = connect_db()
+    cursor.execute("SELECT username, balance, spins FROM Players")
+    users = cursor.fetchall()
+    print("USERS:", users)
+    connect.close()
+    return render_template('syte.html', users=users)
 
 
 if __name__ == '__main__':
-    #init_db()
+
     app.run(host='0.0.0.0', port=5000)
 
 

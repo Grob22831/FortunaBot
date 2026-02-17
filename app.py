@@ -1,16 +1,14 @@
 from aiogram import Bot, Dispatcher,Router
-import asyncio
+import asyncio,os
+from dotenv import load_dotenv
 from handlers.__init__ import connect_dis
-from handlers.stb import token
-#from aiogram.fsm.storage.redis import RedisStorage
-#from redis.asyncio import Redis
-#redis = Redis(host='localhost')
-#storage = RedisStorage(redis)
+
+
 
 router = Router()
 
-
-tbot = Bot(token = token)
+load_dotenv()
+tbot = Bot(token = os.getenv("token"))
 async def main()->None:
 
     dp = Dispatcher()

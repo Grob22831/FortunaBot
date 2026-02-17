@@ -4,5 +4,5 @@ flask
 asyncio
 aiogram
 emoji
-
+dotenv
 requests
