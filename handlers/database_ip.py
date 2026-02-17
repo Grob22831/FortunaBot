@@ -64,7 +64,6 @@ async def get_users_list()->str:
 #WHERE/поиск строки по параметру/ user_id/параметр для поиска/, {список параметров которые подставятся вместо "?"}
 async def check_loot(message: types.Message,user_id, deposit:int):
     if message.dice and message.dice.emoji == casino:
-
         new_balance = await get_balance(user_id)-deposit
         new_spins = await get_spins(user_id)+1
         if int(message.dice.value) == 64:

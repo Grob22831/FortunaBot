@@ -48,7 +48,8 @@ async def fortuna_case_insensitive_handler(message: types.Message):
                 ludka = await message.answer_dice(emoji=casino)
             else:
                 ludka = await message.reply_dice(emoji=casino)
-            await check_loot(ludka, ludka.from_user.id, standart_dep)
+            await check_loot(ludka, message.from_user.id, standart_dep)
+
             stack_of_loot.append(ludka)
             await sleep(dt)
 
