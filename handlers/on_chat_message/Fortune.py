@@ -3,7 +3,7 @@ from handlers.database_ip import check_loot
 from aiogram import F, types, Router
 from aiogram.types import ReactionTypeEmoji
 from asyncio import sleep, create_task
-from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes, standart_dep
+from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes, standard_dep
 
 router = Router()
 
@@ -47,8 +47,8 @@ async def fortuna_case_insensitive_handler(message: types.Message):
             if keyword == "крутка":
                 ludka = await message.answer_dice(emoji=casino)
             else:
-                ludka = await message.reply_dice(emoji=casino)
-            await check_loot(ludka, message.from_user.id, standart_dep)
+                ludka = await message.reply_dice(emoji=casino, disable_notification=True)
+            await check_loot(ludka, message.from_user.id, standard_dep)
 
             stack_of_loot.append(ludka)
             await sleep(dt)

