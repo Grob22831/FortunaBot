@@ -1,3 +1,4 @@
+import sqlite3
 from asyncio import create_task
 from handlers.stb import remove_mes
 from aiogram.filters import Command
@@ -40,3 +41,20 @@ async def bot_get_chat(message: types.Message,):
 async def get_chat_id(message: types.Message):
     chat_id = str(message.chat.id)
     await message.reply(f"Я знаю что тебе надо: {chat_id}")
+
+#ввод названия чата, чтобы его название запоминалсь в базе
+@router.message(Command("rename_chat"))
+async def bot_get_chat(message: types.Message,):
+    mes = message.text.split(" ")
+    if len(mes)<2:
+        message_x = await message.reply("Использование: /rename_chat Название чата")
+        create_task(remove_mes(message_x, 5))
+        return
+    chat_id = str(message.chat.id)
+    chat_name = str(mes[1])
+    connect = sqlite3.connect("../../members.db")
+    cursor = connect.cursor()
+    cursor.execute(f"INSERT OR REPLACE INTO Chats (id,name) VALUES (?,?)", (chat_id,chat_name))
+    connect.commit()
+    connect.close()
+    create_task(remove_mes(message,3))

@@ -17,6 +17,7 @@ cool = emoji.emojize("😎")
 tada = emoji.emojize("🎉")
 imp = emoji.emojize("👏")
 omg = emoji.emojize("😱")
+pickaxe = emoji.emojize("⛏️")
 
 Coefficients = {"777":28, "lll":16, "ggg":9, "bbb":5}
 

@@ -33,8 +33,9 @@ def add_user():
     data = request.json
     user_id = data.get('user_id')
     username = data.get('username')
+    balance = data.get('balance')
     cursor, connect = connect_db()
-    cursor.execute('INSERT INTO Players (user_id,username,balance, spins) VALUES (?,?,?,?)', (user_id, username,0,0))
+    cursor.execute('INSERT INTO Players (user_id,username,balance, spins) VALUES (?,?,?,?)', (user_id, username,balance,0))
     connect.commit()
     connect.close()
     return jsonify({"status": "ok"})  # добавить эту строку

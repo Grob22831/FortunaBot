@@ -1,10 +1,10 @@
 import logging
-from handlers.database_ip import check_loot
+from handlers.database_ip import check_loot, get_balance
 from aiogram import F, types, Router
 from aiogram.types import ReactionTypeEmoji
 from asyncio import sleep, create_task
-from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes, standard_dep
-
+from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes, standard_dep,pickaxe
+import sqlite3
 router = Router()
 
 
@@ -12,7 +12,12 @@ router = Router()
 async def fortuna_case_insensitive_handler(message: types.Message):
     stack_of_loot = []
     keyword = None
-    mes = None  # объявляем заранее
+    mes = None
+
+    if await get_balance(message.from_user.id)<= -1*standard_dep*10:
+        await message.reply("Ты и так в долгах. Чертов капитализм!?"
+                            f"\n Отправь {pickaxe} чтобы сходить на работу")
+        return
 
     try:
         match = message.text.lower().split(' ')
@@ -72,7 +77,11 @@ async def fortuna_case_insensitive_handler(message: types.Message):
                     create_task(remove_mes(i, remove_time))
         try:
             create_task(remove_mes(message, remove_time))
-            print("Запрос обработан!")
-        except Exception as e:
-            logging.info(f"Не получилось удалить сообщение: {e}")
+            connect = sqlite3.connect("../../members.db")
+            cursor = connect.cursor()
+            cursor.execute(f"SELECT username FROM Players WHERE user_id = {message.from_user.id}")
+            username = cursor.fetchone()[0]
+            connect.close()
+            logging.info(f"Запрос обработан! для пользователя:{username} ")
+        except:
             pass
