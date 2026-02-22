@@ -7,4 +7,3 @@ emoji
 dotenv
 requests
 python-dotenv
-django-emoji

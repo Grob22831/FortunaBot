@@ -12,7 +12,7 @@ syte_url = f"http://{os.getenv("syte_ip")}:5000"
 
 
 async def add_user(user_id, username):
-    data = {"user_id": user_id, "username": username}
+    data = {"user_id": user_id, "username": username, "balance":1000}
     request.post(f"{syte_url}/add_user", json=data)
 
 async def change_spins(user_id,new_spins):
@@ -63,7 +63,10 @@ async def get_users_list()->str:
 #WHERE/поиск строки по параметру/ user_id/параметр для поиска/, {список параметров которые подставятся вместо "?"}
 async def check_loot(message: types.Message,user_id, deposit:int):
     if message.dice and message.dice.emoji == casino and not message.forward_from:
-        new_balance = await get_balance(user_id)-deposit
+        old_balance = await get_balance(user_id)
+        if old_balance <=  -1*deposit*10:
+            return
+        new_balance = old_balance-deposit
         new_spins = await get_spins(user_id)+1
         if int(message.dice.value) == 64:
             new_balance += deposit * Coefficients["777"]

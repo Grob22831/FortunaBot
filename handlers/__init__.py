@@ -9,6 +9,7 @@ from handlers.on_chat_message.Fortune import router as fortune_
 from handlers.on_chat_message.reaction import router as reaction_
 from handlers.chat_events.member_join import router as join_
 from handlers.IsWathing import He
+from handlers.on_chat_message.work import router as work_
 
 
 def connect_dis(dp: Dispatcher):
@@ -23,6 +24,7 @@ def connect_dis(dp: Dispatcher):
     #dp.include_router(players_json_)
     #сообщения
     dp.include_router(fortune_)
+    dp.include_router(work_)
 
 
     dp.include_router(reaction_)
