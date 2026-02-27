@@ -2,7 +2,7 @@ import logging
 from aiogram import types
 import emoji
 from asyncio import sleep
-
+from queue import  queue_manager
 throttling_time = 2
 Dice_time = 2
 remove_time = 60
@@ -33,6 +33,7 @@ async def is_win(message: types.Message):
             return cool
     return None
 
+#удаление сообщения
 async def remove_mes(message: types.Message, time: int):
     await sleep(time)
     try:

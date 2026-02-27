@@ -3,10 +3,11 @@ from aiogram import types, Router
 from aiogram.filters import ChatMemberUpdatedFilter, JOIN_TRANSITION, IS_MEMBER, IS_NOT_MEMBER
 from handlers.stb import remove_mes
 router = Router()
-
+from queue import queue_manager
 #сообщение встречающее пользователя который входит в чат
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> IS_MEMBER))
 async def chat_member_join(event: types.ChatMemberUpdated):
+    async def process_execute():
         user_id = event.new_chat_member.user.id
         user_name = event.new_chat_member.user.username
         chat = event.chat
@@ -19,15 +20,18 @@ async def chat_member_join(event: types.ChatMemberUpdated):
                  f"Хочешь узнать о себе в этом чате - пиши /get_stats.\n"
         )
         create_task(remove_mes(message, 100))
+    await queue_manager.add(event.chat.id,process_execute)
 
 
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_MEMBER >> IS_NOT_MEMBER))
 async def chat_member_leave(event: types.ChatMemberUpdated):
-    user = event.old_chat_member.user
-    chat = event.chat
+    async  def process_execute():
+        user = event.old_chat_member.user
+        chat = event.chat
 
-    message = await event.bot.send_message(
-        chat_id=chat.id,
-        text=f"Ну и не надо, ну и пожалуйста, {user.first_name} 👋"
-    )
-    create_task(remove_mes(message, 100))
+        message = await event.bot.send_message(
+            chat_id=chat.id,
+            text=f"Ну и не надо, ну и пожалуйста, {user.first_name} 👋"
+        )
+        create_task(remove_mes(message, 100))
+    queue_manager.add(event.chat.id,process_execute)
