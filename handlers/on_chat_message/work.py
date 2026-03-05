@@ -1,5 +1,5 @@
 import logging
-from handlers.database_ip import check_loot
+from handlers.database_ip import check_loot,get_chat_rules
 from aiogram import F, types, Router
 from aiogram.types import ReactionTypeEmoji
 from asyncio import sleep, create_task
@@ -9,9 +9,14 @@ from handlers.database_ip import get_balance,change_balance
 router = Router()
 from queue import queue_manager
 
-
 @router.message(F.text == pickaxe)
 async def work_on_job(message: types.Message):
+    rules = await get_chat_rules(message.chat.id)
+    if  rules['m_work'] == 0:
+        mes =await message.reply("В этом чате запрещено работать!")
+        create_task(remove_mes(message, 10))
+        create_task(remove_mes(mes, 10))
+        return
     async def proces_execute():  # оборачиваем логику в функцию
         salary = random.randint(0, 30)
 

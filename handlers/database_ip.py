@@ -10,7 +10,7 @@ load_dotenv()
 syte_url = f"http://{os.getenv("syte_ip")}:5000"
 
 
-
+############SET members
 async def add_user(user_id, username):
     data = {"user_id": user_id, "username": username, "balance":1000}
     request.post(f"{syte_url}/add_user", json=data)
@@ -28,7 +28,7 @@ async def clear_users_list():
 
 
 
-#############  GET
+#############  GET members
 async def get_balance(user_id):
     response = request.get(f"{syte_url}/get_balance/{user_id}")
     if response.status_code == 200:
@@ -58,13 +58,63 @@ async def get_users_list()->str:
         return response.json().get("stats",0)
     return "Список пуст, или к нему нет доступа"
 
+###########GET Chats
+async def get_chat_rules(chat_id):
+    response = request.get(f"{syte_url}/take_data/{chat_id}")
+    if response.status_code == 200:
+        data = response.json()
+
+        # Словарь для преобразования
+        status_map = {1: "on", 0: "off"}
+
+        result = (f"Название: {data['name']}\n"
+                  f"Слоты: {status_map[data['m_slots']]}\n"
+                  f"Команды: {status_map[data['m_chat_commands']]}\n"
+                  f"Реакции: {status_map[data['m_reactions']]}\n"
+                  f"Приветствия: {status_map[data['m_welcome']]}\n"
+                  f"Работа: {status_map[data['m_work']]}\n"
+                  f"Мин.баланс: {data['min_balance']}")
+        return result
+
+    return "Чат не найден"
+
+###########SETChats
+async def set_chat_rules(rules: tuple):
+    data = {
+        "chat_id": rules[0],
+        "chat_name": rules[1],
+        "m_slots": rules[2],
+        "m_chat_commands": rules[3],
+        "m_reactions": rules[4],
+        "m_welcome": rules[5],
+        "m_work": rules[6],
+        "min_balance": rules[7]
+    }
+    request.post(f"{syte_url}/save_chats", json=data)
+
+async def change_chat_rules(rules: tuple):
+    data = {
+        "chat_id": rules[0],
+        "m_slots": rules[1],
+        "m_chat_commands": rules[2],
+        "m_reactions": rules[3],
+        "m_welcome": rules[4],
+        "m_work": rules[5],
+        "min_balance": rules[6]
+    }
+    request.post(f"{syte_url}/change_rules", json=data)
+
+
+
 
 #Update/обновить/ Players/Таблица/ SET/установить/ spin/параметр который изменится/ =?/можно указать параметр в скобках/
 #WHERE/поиск строки по параметру/ user_id/параметр для поиска/, {список параметров которые подставятся вместо "?"}
 async def check_loot(message: types.Message,user_id, deposit:int):
     if message.dice and message.dice.emoji == casino and not message.forward_from:
         old_balance = await get_balance(user_id)
-        if old_balance <=  -1*deposit*10:
+        rules = await get_chat_rules(message.chat.id)
+        min_balance = rules['min_balance'] if rules != "Чат не найден" else -500
+        if old_balance <= min_balance :
             return
         new_balance = old_balance-deposit
         new_spins = await get_spins(user_id)+1

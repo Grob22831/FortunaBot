@@ -1,10 +1,14 @@
 import sqlite3
 from asyncio import create_task
+
+from PyInstaller.compat import getenv
+
 from handlers.stb import remove_mes
 from aiogram.filters import Command
 from aiogram import types,Router,Bot, F
 from handlers.stb import  casino_chat
 import os
+from handlers.database_ip import set_chat_rules,get_chat_rules
 from dotenv import load_dotenv
 from asyncio import sleep
 load_dotenv()
@@ -26,30 +30,95 @@ async def bot_get_chat(message: types.Message,):
 #позволяет узнать id chata
 @router.message(Command("get_chat_id"))
 async def get_chat_id(message: types.Message):
+    rules = await get_chat_rules(message.chat.id)
+    if rules['m_chat_commands'] == 0:
+        mes = await message.reply("Тут такое нельзя")
+        create_task(remove_mes(message, 10))
+        create_task(remove_mes(mes, 10))
+        return
     chat_id = str(message.chat.id)
     await message.reply(f"Я знаю что тебе надо: {chat_id}")
 
 
-
-##################### Запоминание чата ######################
-#ввод названия чата, чтобы его название запоминалсь в базе
-@router.message(Command("rename_chat"))
-async def bot_get_chat(message: types.Message,):
-    mes = message.text.split(" ")
-    if len(mes)<2:
-        message_x = await message.reply("Использование: /rename_chat Название чата")
-        create_task(remove_mes(message_x, 5))
+#####################Правила чата ######################
+@router.message(Command("set_rules"))
+async def set_chat_rules_cmd(message: types.Message):
+    # Проверяем, является ли пользователь администратором чата
+    user_status = await message.chat.get_member(message.from_user.id)
+    if user_status.status not in ["administrator", "creator"] and not message.from_user.id == getenv("general_headquarters"):
+        mes = await message.reply("❌ Только администраторы могут изменять правила")
+        create_task(remove_mes(message, 10))
+        create_task(remove_mes(mes, 10))
         return
-    chat_id = str(message.chat.id)
-    chat_name = str(mes[1])
-    connect = sqlite3.connect("chats.db")
-    cursor = connect.cursor()
-    cursor.execute(f"INSERT OR REPLACE INTO Chats (id,name) VALUES (?,?)", (chat_id,chat_name))
-    connect.commit()
-    connect.close()
-    await sleep(0.1)
-    create_task(remove_mes(message,3))
 
+    mes = message.text.split(" ")
+
+    if len(mes) < 8:
+        message_x = await message.reply(
+            "Использование: /set_rules [слоты] [команды] [реакции] [приветствия] [работа] [мин_баланс]\n"
+            "Пример: /set_rules on on on on on -500"
+        )
+        create_task(remove_mes(message_x, 10))
+        return
+
+    try:
+        status_map = {"on": 1, "off": 0}
+
+        m_slots = status_map[mes[1].lower()]
+        m_chat_commands = status_map[mes[2].lower()]
+        m_reactions = status_map[mes[3].lower()]
+        m_welcome = status_map[mes[4].lower()]
+        m_work = status_map[mes[5].lower()]
+        min_balance = int(mes[6])
+
+        chat_id = message.chat.id
+        chat_name = message.chat.title or "Личный чат"
+
+        rules = (chat_id, chat_name, m_slots, m_chat_commands,
+                 m_reactions, m_welcome, m_work, min_balance)
+
+        await set_chat_rules(rules)
+        mes = await message.reply("✅ Правила чата обновлены")
+
+
+    except KeyError:
+        mes = await message.reply("❌ Ошибка: используйте 'on' или 'off'")
+    except ValueError:
+        mes = await message.reply("❌ Ошибка: баланс должен быть числом")
+    except Exception as e:
+        mes = await message.reply(f"❌ Ошибка: {e}")
+    finally:
+        create_task(remove_mes(mes, 10))
+
+    create_task(remove_mes(message, 3))
+
+
+@router.message(Command("get_rules"))
+async def get_chat_rules_cmd(message: types.Message):
+    chat_id = message.chat.id
+    chat_name = message.chat.title or "Личный чат"
+
+    rules_text = await get_chat_rules(chat_id)
+
+    if rules_text == "Чат не найден":
+        # Создаем правила по умолчанию
+        default_rules = (chat_id, chat_name, 1, 1, 1, 1, 1, -500)
+        await set_chat_rules(default_rules)
+
+        # Показываем созданные правила
+        rules_text = (f"Название: {chat_name}\n"
+                      f"Слоты: on\n"
+                      f"Команды: on\n"
+                      f"Реакции: on\n"
+                      f"Приветствия: on\n"
+                      f"Работа: on\n"
+                      f"Мин.баланс: -500")
+
+        await message.reply(f"✅ Правила не найдены — созданы новые\n\n{rules_text}")
+    else:
+        await message.reply(f"📋 Текущие правила:\n{rules_text}")
+
+    create_task(remove_mes(message, 30))
 
 ################# Разговор бота ######################
 

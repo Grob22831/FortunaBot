@@ -1,22 +1,29 @@
 import logging
-from handlers.database_ip import check_loot, get_balance
+from handlers.database_ip import check_loot, get_balance,get_chat_rules
 from aiogram import F, types, Router
 from aiogram.types import ReactionTypeEmoji
 from asyncio import sleep, create_task
 from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes, standard_dep,pickaxe
 import sqlite3
 router = Router()
+
 from queue import queue_manager
 
 @router.message((F.text.lower().split().contains("крутка")) | (F.text.lower().split().contains("лудка")))
 async def fortuna_case_insensitive_handler(message: types.Message):
+    rules = await get_chat_rules(message.chat.id)
+    if rules!="Чат не найден" and rules['m_slots'] == 0:
+        mes = await message.reply("❌ Слоты отключены в этом чате")
 
+        create_task(remove_mes(message, 10))
+        create_task(remove_mes(mes, 10))
+        return
     async def proces_execute():
         stack_of_loot = []
         keyword = None
         mes = None
 
-        if await get_balance(message.from_user.id) <= -1 * standard_dep * 10:
+        if await get_balance(message.from_user.id) <= rules['min_balance']:
             mesige = await message.reply("Ты и так в долгах. Чертов капитализм!?"
                                          f"\n Отправь {pickaxe} чтобы сходить на работу")
             await remove_mes(mesige, remove_time - 30)
@@ -89,4 +96,4 @@ async def fortuna_case_insensitive_handler(message: types.Message):
                 logging.info(f"Запрос обработан! для пользователя:{username} ")
             except:
                 pass
-        await queue_manager.add(message.chat.id,proces_execute())
+    await queue_manager.add(message.chat.id,proces_execute())

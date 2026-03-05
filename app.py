@@ -16,8 +16,6 @@ async def main()->None:
     connect_dis(dp)
     await dp.start_polling(tbot)
 
-
-
 if __name__ == '__main__':
     try:
         asyncio.run(main())

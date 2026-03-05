@@ -2,11 +2,19 @@ from asyncio import create_task
 from aiogram import types, Router
 from aiogram.filters import ChatMemberUpdatedFilter, JOIN_TRANSITION, IS_MEMBER, IS_NOT_MEMBER
 from handlers.stb import remove_mes
-router = Router()
 from queue import queue_manager
+from handlers.database_ip import get_chat_rules
+
+
+router = Router()
+
+
 #сообщение встречающее пользователя который входит в чат
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> IS_MEMBER))
 async def chat_member_join(event: types.ChatMemberUpdated):
+    rules = await get_chat_rules(event.chat.id)
+    if rules['m_welcome'] == 0:
+        return
     async def process_execute():
         user_id = event.new_chat_member.user.id
         user_name = event.new_chat_member.user.username

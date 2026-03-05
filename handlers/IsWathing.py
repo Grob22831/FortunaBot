@@ -8,6 +8,7 @@ import asyncio
 from handlers.stb import throttling_time as tt, remove_time, remove_mes,standard_dep
 #from handlers.database import add_user,player_exists
 from handlers.database_ip import check_loot,add_user,player_exists
+from handlers.database_ip import set_chat_rules,get_chat_rules
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,13 +20,19 @@ class He(BaseMiddleware):
         self.delay =  tt
 
     async def __call__(self, handler, event: Update, data: dict):
-
-
-
         if event.message:
             connect = sqlite3.connect("chats.db")
             cursor = connect.cursor()
+            chat_id = event.message.chat.id
+            chat_name = event.message.chat.title or "Личный чат"
             name = str()
+            # Проверяем есть ли чат в БД
+            rules = await get_chat_rules(chat_id)
+            if rules == "Чат не найден":
+                # Создаем с правилами по умолчанию
+                default_rules = (chat_id, chat_name, 1, 1, 1, 1, 1, -500)
+                await set_chat_rules(default_rules)
+                logging.info(f"Созданы правила для нового чата: {chat_name}")
             try:
                 cursor.execute("SELECT name FROM Chats WHERE id = ?", (event.message.chat.id,))
                 name = cursor.fetchone()[0]
@@ -51,7 +58,7 @@ class He(BaseMiddleware):
                 text = event.message.text or ""
                 if "крутка" in text.lower() or "лудка" in text.lower():
                     asyncio.create_task(remove_mes(message=event.message, time=remove_time -30))
-                if text == "⛏️":  # или pickaxe из импорта
+                if text == "⛏️":
                     asyncio.create_task(remove_mes(message=event.message, time=remove_time - 30))
                 return None  # пропускаем
 
