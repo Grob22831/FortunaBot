@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import sqlite3
 import os
 
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "../../members.db")
 CH_DB_PATH  = os.path.join(BASE_DIR, "../../chats.db")
@@ -19,7 +20,7 @@ def connect_chats_db():
 @app.route("/save_chats", methods=["POST"])
 def set_rules():
     data = request.json
-    chat_id = data.get('chat_id')
+    chat_id = int(data.get('chat_id'))
     chat_name = data.get('chat_name')
     m_slots = data.get('m_slots')
     m_chat_commands = data.get('m_chat_commands')
@@ -79,8 +80,8 @@ def change_rules():
     connect.close()
     return jsonify({"status": "ok"})
 ################GET chats
-@app.route("/take_data/<int:chat_id>", methods=["GET"])  # добавил параметр в URL
-def get_chat_rules(chat_id):  # переименовал функцию
+@app.route("/take_data/<int:chat_id>", methods=["GET"])
+def get_chat_rules(chat_id):
     cursor, connect = connect_chats_db()
     cursor.execute("SELECT * FROM Chats WHERE id = ?", (chat_id,))  # id вместо chat_id
     result = cursor.fetchone()
@@ -230,7 +231,6 @@ def index():
 
 
 if __name__ == '__main__':
-
     app.run(host='0.0.0.0', port=5000)
 
 

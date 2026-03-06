@@ -1,14 +1,12 @@
 import sqlite3
 from asyncio import create_task
 
-from PyInstaller.compat import getenv
-
 from handlers.stb import remove_mes
 from aiogram.filters import Command
 from aiogram import types,Router,Bot, F
 from handlers.stb import  casino_chat
 import os
-from handlers.database_ip import set_chat_rules,get_chat_rules
+from handlers.database_ip import set_chat_rules,get_chat_rules_str,get_chat_rules_dict
 from dotenv import load_dotenv
 from asyncio import sleep
 load_dotenv()
@@ -30,7 +28,7 @@ async def bot_get_chat(message: types.Message,):
 #позволяет узнать id chata
 @router.message(Command("get_chat_id"))
 async def get_chat_id(message: types.Message):
-    rules = await get_chat_rules(message.chat.id)
+    rules = await get_chat_rules_dict(message.chat.id)
     if rules['m_chat_commands'] == 0:
         mes = await message.reply("Тут такое нельзя")
         create_task(remove_mes(message, 10))
@@ -45,7 +43,7 @@ async def get_chat_id(message: types.Message):
 async def set_chat_rules_cmd(message: types.Message):
     # Проверяем, является ли пользователь администратором чата
     user_status = await message.chat.get_member(message.from_user.id)
-    if user_status.status not in ["administrator", "creator"] and not message.from_user.id == getenv("general_headquarters"):
+    if user_status.status not in ["administrator", "creator"] and not message.from_user.id == os.getenv("general_headquarters"):
         mes = await message.reply("❌ Только администраторы могут изменять правила")
         create_task(remove_mes(message, 10))
         create_task(remove_mes(mes, 10))
@@ -98,7 +96,7 @@ async def get_chat_rules_cmd(message: types.Message):
     chat_id = message.chat.id
     chat_name = message.chat.title or "Личный чат"
 
-    rules_text = await get_chat_rules(chat_id)
+    rules_text = await get_chat_rules_str(chat_id)
 
     if rules_text == "Чат не найден":
         # Создаем правила по умолчанию

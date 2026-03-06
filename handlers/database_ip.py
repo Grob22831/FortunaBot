@@ -3,68 +3,75 @@ import requests as request
 from aiogram import types
 from handlers.stb import casino, Coefficients
 from dotenv import load_dotenv
+from handlers.conect_session import session,syte_url
 
 
 
-load_dotenv()
-syte_url = f"http://{os.getenv("syte_ip")}:5000"
 
 
 ############SET members
 async def add_user(user_id, username):
     data = {"user_id": user_id, "username": username, "balance":1000}
-    request.post(f"{syte_url}/add_user", json=data)
+    session.post(f"{syte_url}/add_user", json=data)
+    #request.post(f"{syte_url}/add_user", json=data)
 
 async def change_spins(user_id,new_spins):
     data = {"user_id": user_id, "new_spins":new_spins}
-    request.post(f"{syte_url}/add_spins", json=data)
+    session.post(f"{syte_url}/add_spins", json=data)
+    #request.post(f"{syte_url}/add_spins", json=data)
 
 async def change_balance(user_id,new_balance):
     data = {"user_id": user_id, "new_balance":new_balance}
-    request.post(f"{syte_url}/add_balance", json=data)
-async def clear_users_list():
-    request.post(f"{syte_url}/clear_users_list")
+    session.post(f"{syte_url}/add_balance", json=data)
+    #request.post(f"{syte_url}/add_balance", json=data)
+#async def clear_users_list():
+    #request.post(f"{syte_url}/clear_users_list")
 
 
 
 
 #############  GET members
 async def get_balance(user_id):
-    response = request.get(f"{syte_url}/get_balance/{user_id}")
+    #response = request.get(f"{syte_url}/get_balance/{user_id}")
+    response = session.get(f"{syte_url}/get_balance/{user_id}")
     if response.status_code == 200:
         return response.json().get("balance", 0)
     return 0
 
 async def get_spins(user_id):
-    response = request.get(f"{syte_url}/get_spins/{user_id}")
+    #response = request.get(f"{syte_url}/get_spins/{user_id}")
+    response = session.get(f"{syte_url}/get_spins/{user_id}")
     if response.status_code == 200:
         return response.json().get("spins", 0)
     return 0
 
 async def get_stats(user_id):
-    response = request.get(f"{syte_url}/get_stats/{user_id}")
+    #response = request.get(f"{syte_url}/get_stats/{user_id}")
+    response = session.get(f"{syte_url}/get_stats/{user_id}")
     if response.status_code == 200:
         data = response.json()
         return f"{data['username']}  Баланс: {data['balance']}, Крутки: {data['spins']}"
     return None
 
-async def player_exists(user_id):
-    response = request.get(f"{syte_url}/get_stats/{user_id}")
+async def player_exists(user_id)->bool:
+    #response = request.get(f"{syte_url}/get_stats/{user_id}")
+    response = session.get(f"{syte_url}/get_stats/{user_id}")
     return response.status_code == 200
 
 async def get_users_list()->str:
-    response = request.get(f"{syte_url}/get_users_list")
+    #response = request.get(f"{syte_url}/get_users_list")
+    response = session.get(f"{syte_url}/get_users_list")
     if response.status_code == 200:
         return response.json().get("stats",0)
     return "Список пуст, или к нему нет доступа"
 
 ###########GET Chats
-async def get_chat_rules(chat_id):
-    response = request.get(f"{syte_url}/take_data/{chat_id}")
+async def get_chat_rules_str(chat_id):
+    #response = request.get(f"{syte_url}/take_data/{chat_id}")
+    response = session.get(f"{syte_url}/take_data/{chat_id}")
     if response.status_code == 200:
         data = response.json()
 
-        # Словарь для преобразования
         status_map = {1: "on", 0: "off"}
 
         result = (f"Название: {data['name']}\n"
@@ -78,6 +85,14 @@ async def get_chat_rules(chat_id):
 
     return "Чат не найден"
 
+async def get_chat_rules_dict(chat_id):
+    #response = request.get(f"{syte_url}/take_data/{chat_id}")
+    response = session.get(f"{syte_url}/take_data/{chat_id}")
+    if response.status_code == 200:
+        data = response.json()
+
+        return data
+    return None
 ###########SETChats
 async def set_chat_rules(rules: tuple):
     data = {
@@ -112,8 +127,8 @@ async def change_chat_rules(rules: tuple):
 async def check_loot(message: types.Message,user_id, deposit:int):
     if message.dice and message.dice.emoji == casino and not message.forward_from:
         old_balance = await get_balance(user_id)
-        rules = await get_chat_rules(message.chat.id)
-        min_balance = rules['min_balance'] if rules != "Чат не найден" else -500
+        rules = await get_chat_rules_dict(message.chat.id)
+        min_balance = rules['min_balance'] if rules is not None else -500
         if old_balance <= min_balance :
             return
         new_balance = old_balance-deposit
