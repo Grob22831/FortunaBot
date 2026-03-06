@@ -51,7 +51,7 @@ async def set_chat_rules_cmd(message: types.Message):
 
     mes = message.text.split(" ")
 
-    if len(mes) < 8:
+    if len(mes) < 7:
         message_x = await message.reply(
             "Использование: /set_rules [слоты] [команды] [реакции] [приветствия] [работа] [мин_баланс]\n"
             "Пример: /set_rules on on on on on -500"
@@ -112,11 +112,12 @@ async def get_chat_rules_cmd(message: types.Message):
                       f"Работа: on\n"
                       f"Мин.баланс: -500")
 
-        await message.reply(f"✅ Правила не найдены — созданы новые\n\n{rules_text}")
+        mes =await message.reply(f"✅ Правила не найдены — созданы новые\n\n{rules_text}")
     else:
-        await message.reply(f"📋 Текущие правила:\n{rules_text}")
+        mes =await message.reply(f"📋 Текущие правила:\n{rules_text}")
 
-    create_task(remove_mes(message, 30))
+    create_task(remove_mes(message, 15))
+    create_task(remove_mes(mes, 30))
 
 ################# Разговор бота ######################
 

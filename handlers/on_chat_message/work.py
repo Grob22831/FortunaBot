@@ -1,5 +1,5 @@
 import logging
-from handlers.database_ip import check_loot,get_chat_rules
+from handlers.database_ip import check_loot,get_chat_rules_dict
 from aiogram import F, types, Router
 from aiogram.types import ReactionTypeEmoji
 from asyncio import sleep, create_task
@@ -7,12 +7,12 @@ from handlers.stb import pickaxe, remove_time, remove_mes, standard_dep
 import sqlite3,random
 from handlers.database_ip import get_balance,change_balance
 router = Router()
-from queue import queue_manager
+from _queue import queue_manager
 
 @router.message(F.text == pickaxe)
 async def work_on_job(message: types.Message):
-    rules = await get_chat_rules(message.chat.id)
-    if  rules['m_work'] == 0:
+    rules = await get_chat_rules_dict(message.chat.id)
+    if  rules is not None and rules['m_work'] == 0:
         mes =await message.reply("В этом чате запрещено работать!")
         create_task(remove_mes(message, 10))
         create_task(remove_mes(mes, 10))

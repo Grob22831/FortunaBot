@@ -8,7 +8,7 @@ import asyncio
 from handlers.stb import throttling_time as tt, remove_time, remove_mes,standard_dep
 #from handlers.database import add_user,player_exists
 from handlers.database_ip import check_loot,add_user,player_exists
-from handlers.database_ip import set_chat_rules,get_chat_rules
+from handlers.database_ip import set_chat_rules,get_chat_rules_str
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,7 +27,7 @@ class He(BaseMiddleware):
             chat_name = event.message.chat.title or "Личный чат"
             name = str()
             # Проверяем есть ли чат в БД
-            rules = await get_chat_rules(chat_id)
+            rules = await get_chat_rules_str(chat_id)
             if rules == "Чат не найден":
                 # Создаем с правилами по умолчанию
                 default_rules = (chat_id, chat_name, 1, 1, 1, 1, 1, -500)

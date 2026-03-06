@@ -2,11 +2,11 @@ from asyncio import create_task
 
 from flask.cli import load_dotenv
 
-from handlers.database_ip import get_users_list,clear_users_list, get_stats
+from handlers.database_ip import get_users_list, get_stats
 from aiogram.filters import Command
 from aiogram import types,Router
 from handlers.stb import remove_mes
-from queue import queue_manager
+from _queue import queue_manager
 router = Router()
 from dotenv import load_dotenv
 from os import getenv
@@ -26,7 +26,7 @@ async def get_users(message: types.Message):
         stats = await message.answer(list_of_users)
         create_task(remove_mes(message, 25))
         create_task(remove_mes(stats, 25))
-    queue_manager.add(message.chat.id,process_execute())
+    await queue_manager.add(message.chat.id,process_execute, message,message.message_thread_id)
 #выводит информацию о тебе
 @router.message(Command('get_stats'))
 async def get_users(message: types.Message):
@@ -36,7 +36,7 @@ async def get_users(message: types.Message):
         stats = await message.answer(stats)
         create_task(remove_mes(message, 25))
         create_task(remove_mes(stats, 25))
-    queue_manager.add(message.chat.id, process_execute())
+    await queue_manager.add(message.chat.id, process_execute,message,message.message_thread_id)
 
 #удаляет из списка всех игроков
 #@router.message(Command('clear_users'))

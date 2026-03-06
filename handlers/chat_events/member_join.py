@@ -2,8 +2,8 @@ from asyncio import create_task
 from aiogram import types, Router
 from aiogram.filters import ChatMemberUpdatedFilter, JOIN_TRANSITION, IS_MEMBER, IS_NOT_MEMBER
 from handlers.stb import remove_mes
-from queue import queue_manager
-from handlers.database_ip import get_chat_rules
+from _queue import queue_manager
+from handlers.database_ip import get_chat_rules_dict
 
 
 router = Router()
@@ -12,7 +12,7 @@ router = Router()
 #сообщение встречающее пользователя который входит в чат
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> IS_MEMBER))
 async def chat_member_join(event: types.ChatMemberUpdated):
-    rules = await get_chat_rules(event.chat.id)
+    rules = await get_chat_rules_dict(event.chat.id)
     if rules['m_welcome'] == 0:
         return
     async def process_execute():
@@ -28,7 +28,7 @@ async def chat_member_join(event: types.ChatMemberUpdated):
                  f"Хочешь узнать о себе в этом чате - пиши /get_stats.\n"
         )
         create_task(remove_mes(message, 100))
-    await queue_manager.add(event.chat.id,process_execute)
+    await queue_manager.add(event.chat.id,process_execute,event, getattr(event, 'message_thread_id', None) )
 
 
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_MEMBER >> IS_NOT_MEMBER))
@@ -42,4 +42,4 @@ async def chat_member_leave(event: types.ChatMemberUpdated):
             text=f"Ну и не надо, ну и пожалуйста, {user.first_name} 👋"
         )
         create_task(remove_mes(message, 100))
-    queue_manager.add(event.chat.id,process_execute)
+    queue_manager.add(event.chat.id,process_execute,event, getattr(event, 'message_thread_id', None))

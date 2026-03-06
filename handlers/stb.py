@@ -2,7 +2,7 @@ import logging
 from aiogram import types
 import emoji
 from asyncio import sleep
-from queue import  queue_manager
+from _queue import  queue_manager
 throttling_time = 2
 Dice_time = 2
 remove_time = 60

@@ -28,7 +28,6 @@ def set_rules():
     m_welcome = data.get('m_welcome')
     m_work = data.get('m_work')
     min_balance = data.get('min_balance')
-
     cursor, connect = connect_chats_db()
 
     cursor.execute("SELECT id FROM Chats WHERE id = ?", (chat_id,))
@@ -51,6 +50,9 @@ def set_rules():
              m_reactions, m_welcome, m_work, min_balance)
         )
 
+    # Проверяем, что сохранилось
+    cursor.execute("SELECT * FROM Chats WHERE id = ?", (chat_id,))
+    saved = cursor.fetchone()
     connect.commit()
     connect.close()
     return jsonify({"status": "ok"})
@@ -80,10 +82,11 @@ def change_rules():
     connect.close()
     return jsonify({"status": "ok"})
 ################GET chats
-@app.route("/take_data/<int:chat_id>", methods=["GET"])
+@app.route("/take_data/<path:chat_id>", methods=["GET"])
 def get_chat_rules(chat_id):
     cursor, connect = connect_chats_db()
-    cursor.execute("SELECT * FROM Chats WHERE id = ?", (chat_id,))  # id вместо chat_id
+    result =cursor.execute("SELECT * FROM Chats").fetchall()
+    cursor.execute("SELECT * FROM Chats WHERE id = ?", (int(chat_id),))  # id вместо chat_id
     result = cursor.fetchone()
     connect.close()
     if result:
@@ -97,6 +100,7 @@ def get_chat_rules(chat_id):
             "m_work": result[6],
             "min_balance": result[7]
         })
+
     return jsonify({"error": "Chat not found"}), 404
 
 
