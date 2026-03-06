@@ -2,7 +2,7 @@ import asyncio
 import logging
 from collections import defaultdict, deque
 
-
+#очередь
 class RequestQueue:
     def __init__(self):
         self.queues = defaultdict(deque)
