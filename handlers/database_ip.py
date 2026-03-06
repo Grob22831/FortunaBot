@@ -12,17 +12,20 @@ from handlers.conect_session import session,syte_url
 ############SET members
 async def add_user(user_id, username):
     data = {"user_id": user_id, "username": username, "balance":1000}
-    session.post(f"{syte_url}/add_user", json=data)
+    async with session.post(f"{syte_url}/add_user", json=data) as resp:
+        return await resp.json()
     #request.post(f"{syte_url}/add_user", json=data)
 
 async def change_spins(user_id,new_spins):
     data = {"user_id": user_id, "new_spins":new_spins}
-    session.post(f"{syte_url}/add_spins", json=data)
+    async with session.post(f"{syte_url}/add_spins", json=data) as resp:
+        return await resp.json()
     #request.post(f"{syte_url}/add_spins", json=data)
 
 async def change_balance(user_id,new_balance):
     data = {"user_id": user_id, "new_balance":new_balance}
-    session.post(f"{syte_url}/add_balance", json=data)
+    async with session.post(f"{syte_url}/add_balance", json=data) as resp:
+        return await resp.json()
     #request.post(f"{syte_url}/add_balance", json=data)
 #async def clear_users_list():
     #request.post(f"{syte_url}/clear_users_list")
@@ -33,66 +36,69 @@ async def change_balance(user_id,new_balance):
 #############  GET members
 async def get_balance(user_id):
     #response = request.get(f"{syte_url}/get_balance/{user_id}")
-    response = session.get(f"{syte_url}/get_balance/{user_id}")
-    if response.status_code == 200:
-        return response.json().get("balance", 0)
+    async with session.get(f"{syte_url}/get_balance/{user_id}") as resp:
+        if resp.status == 200:
+            data = await resp.json()
+            return data.get("balance", 0)
     return 0
 
 async def get_spins(user_id):
     #response = request.get(f"{syte_url}/get_spins/{user_id}")
-    response = session.get(f"{syte_url}/get_spins/{user_id}")
-    if response.status_code == 200:
-        return response.json().get("spins", 0)
+    async with session.get(f"{syte_url}/get_spins/{user_id}") as resp:
+        if resp.status == 200:
+            data = await resp.json()
+            return data.get("spins", 0)
     return 0
 
 async def get_stats(user_id):
     #response = request.get(f"{syte_url}/get_stats/{user_id}")
-    response = session.get(f"{syte_url}/get_stats/{user_id}")
-    if response.status_code == 200:
-        data = response.json()
-        return f"{data['username']}  Баланс: {data['balance']}, Крутки: {data['spins']}"
+    async with session.get(f"{syte_url}/get_stats/{user_id}") as resp:
+        if resp.status == 200:
+            data = await resp.json()
+            return f"{data['username']}  Баланс: {data['balance']}, Крутки: {data['spins']}"
     return None
 
 async def player_exists(user_id)->bool:
     #response = request.get(f"{syte_url}/get_stats/{user_id}")
-    response = session.get(f"{syte_url}/get_stats/{user_id}")
-    return response.status_code == 200
+    async with session.get(f"{syte_url}/get_stats/{user_id}") as resp:
+        return resp.status == 200
 
 async def get_users_list()->str:
     #response = request.get(f"{syte_url}/get_users_list")
-    response = session.get(f"{syte_url}/get_users_list")
-    if response.status_code == 200:
-        return response.json().get("stats",0)
-    return "Список пуст, или к нему нет доступа"
+    async with session.get(f"{syte_url}/get_users_list") as resp:
+        if resp.status == 200:
+            data = await resp.json()
+            return data.get("stats",0)
+        return "Список пуст, или к нему нет доступа"
 
 ###########GET Chats
 async def get_chat_rules_str(chat_id):
     #response = request.get(f"{syte_url}/take_data/{chat_id}")
-    response = session.get(f"{syte_url}/take_data/{chat_id}")
-    if response.status_code == 200:
-        data = response.json()
+    async with session.get(f"{syte_url}/take_data/{chat_id}") as resp:
+        if resp.status == 200:
+            data = resp.json()
 
-        status_map = {1: "on", 0: "off"}
+            status_map = {1: "on", 0: "off"}
 
-        result = (f"Название: {data['name']}\n"
-                  f"Слоты: {status_map[data['m_slots']]}\n"
-                  f"Команды: {status_map[data['m_chat_commands']]}\n"
-                  f"Реакции: {status_map[data['m_reactions']]}\n"
-                  f"Приветствия: {status_map[data['m_welcome']]}\n"
-                  f"Работа: {status_map[data['m_work']]}\n"
-                  f"Мин.баланс: {data['min_balance']}")
-        return result
+            result = (f"Название: {data['name']}\n"
+                      f"Слоты: {status_map[data['m_slots']]}\n"
+                      f"Команды: {status_map[data['m_chat_commands']]}\n"
+                      f"Реакции: {status_map[data['m_reactions']]}\n"
+                      f"Приветствия: {status_map[data['m_welcome']]}\n"
+                      f"Работа: {status_map[data['m_work']]}\n"
+                      f"Мин.баланс: {data['min_balance']}")
+            return result
 
-    return "Чат не найден"
+        return "Чат не найден"
 
 async def get_chat_rules_dict(chat_id):
     #response = request.get(f"{syte_url}/take_data/{chat_id}")
-    response = session.get(f"{syte_url}/take_data/{chat_id}")
-    if response.status_code == 200:
-        data = response.json()
+    async with session.get(f"{syte_url}/take_data/{chat_id}") as resp:
+        if resp.status == 200:
+            data = resp.json()
+            return data
+        return None
 
-        return data
-    return None
 ###########SETChats
 async def set_chat_rules(rules: tuple):
     data = {
@@ -105,7 +111,8 @@ async def set_chat_rules(rules: tuple):
         "m_work": rules[6],
         "min_balance": rules[7]
     }
-    request.post(f"{syte_url}/save_chats", json=data)
+    async with session.post(f"{syte_url}/save_chats", json=data) as resp:
+        return resp.json()
 
 async def change_chat_rules(rules: tuple):
     data = {
@@ -117,7 +124,8 @@ async def change_chat_rules(rules: tuple):
         "m_work": rules[5],
         "min_balance": rules[6]
     }
-    request.post(f"{syte_url}/change_rules", json=data)
+    async with session.post(f"{syte_url}/change_rules", json=data) as resp:
+        return resp.json()
 
 
 

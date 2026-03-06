@@ -8,19 +8,24 @@ router = Router()
 load_dotenv()
 tbot = Bot(token = os.getenv("token"))
 async def main()->None:
-
+    await init_http()
     dp = Dispatcher()
     # создал роутер, добавь его в диспетчер
+
     connect_dis(dp)
-    await dp.start_polling(tbot)
+    try:
+        await dp.start_polling(tbot)
+    finally:
+        await close_http()
+
 
 if __name__ == '__main__':
     try:
-        init_http()
+
         asyncio.run(main())
     except KeyboardInterrupt:
         print("Bot is dead")
-        close_http()
+
 
 
 
