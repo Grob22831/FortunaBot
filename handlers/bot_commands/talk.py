@@ -1,14 +1,11 @@
-import sqlite3
-from asyncio import create_task
-
-from handlers.stb import remove_mes
+from asyncio import create_task,sleep
+import os
 from aiogram.filters import Command
 from aiogram import types,Router,Bot, F
+from handlers.stb import remove_mes
 from handlers.stb import  casino_chat
-import os
 from handlers.database_ip import set_chat_rules,get_chat_rules_str,get_chat_rules_dict
 from dotenv import load_dotenv
-from asyncio import sleep
 load_dotenv()
 router = Router()
 
@@ -21,7 +18,7 @@ router = Router()
 async def bot_get_chat(message: types.Message,):
     chat_id = str(message.chat.id)
     chat_name = str(message.chat.full_name)
-    await message.answer(chat_id=os.getenv("general_headquarters") ,
+    await message.answer(chat_id=int(os.getenv("general_headquarters")) ,
                          text=f"Вот тебе маленький дедосер -{chat_name} - {chat_id} id этого чата" )
     create_task(remove_mes(message,3))
 
@@ -43,7 +40,7 @@ async def get_chat_id(message: types.Message):
 async def set_chat_rules_cmd(message: types.Message):
     # Проверяем, является ли пользователь администратором чата
     user_status = await message.chat.get_member(message.from_user.id)
-    if user_status.status not in ["administrator", "creator"] and not message.from_user.id == os.getenv("general_headquarters"):
+    if user_status.status not in ["administrator", "creator"] and not message.from_user.id == int(os.getenv("general_headquarters")):
         mes = await message.reply("❌ Только администраторы могут изменять правила")
         create_task(remove_mes(message, 10))
         create_task(remove_mes(mes, 10))
@@ -156,7 +153,7 @@ async def forward_to_private(message: types.Message,bot:Bot):
 
         # Копируем в личку с подписью
         await message.bot.copy_message(
-            chat_id=os.getenv("general_headquarters"),  # твой личный ID
+            chat_id=int(os.getenv("general_headquarters")),  # твой личный ID
             from_chat_id=original_chat_id,
             message_id=original_message_id,
             caption=caption

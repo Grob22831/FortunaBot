@@ -1,8 +1,8 @@
 from asyncio import create_task
 from aiogram import types, Router
-from aiogram.filters import ChatMemberUpdatedFilter, JOIN_TRANSITION, IS_MEMBER, IS_NOT_MEMBER
+from aiogram.filters import ChatMemberUpdatedFilter, IS_MEMBER, IS_NOT_MEMBER
 from handlers.stb import remove_mes
-from _queue import queue_manager
+from handlers._queue import queue_manager
 from handlers.database_ip import get_chat_rules_dict
 
 

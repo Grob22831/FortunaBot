@@ -1,13 +1,12 @@
 import logging
-from handlers.database_ip import check_loot,get_chat_rules_dict
+from handlers.database_ip import get_chat_rules_dict
 from aiogram import F, types, Router
-from aiogram.types import ReactionTypeEmoji
-from asyncio import sleep, create_task
-from handlers.stb import pickaxe, remove_time, remove_mes, standard_dep
-import sqlite3,random
+from asyncio import create_task
+from handlers.stb import pickaxe, remove_time, remove_mes
+import random
 from handlers.database_ip import get_balance,change_balance
 router = Router()
-from _queue import queue_manager
+from handlers._queue import queue_manager
 
 @router.message(F.text == pickaxe)
 async def work_on_job(message: types.Message):
@@ -40,6 +39,6 @@ async def work_on_job(message: types.Message):
             logging.error("Не удалось удалить сообщение")
 
     # Добавляем задачу в очередь
-    await queue_manager.add(message.chat.id, proces_execute())
+    await queue_manager.add(message.chat.id, proces_execute)
 
 

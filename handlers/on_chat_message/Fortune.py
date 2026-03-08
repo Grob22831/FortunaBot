@@ -4,18 +4,12 @@ from aiogram import F, types, Router
 from aiogram.types import ReactionTypeEmoji
 from asyncio import sleep, create_task
 from handlers.stb import Dice_time as dt, casino, is_win, remove_time, remove_mes, standard_dep,pickaxe
-import sqlite3
 router = Router()
 
-from _queue import queue_manager
+from handlers._queue import queue_manager
 
-@router.message(F.text)
+@router.message(F.text.lower().contains("крутка") | F.text.lower().contains("лудка"))
 async def fortuna_case_insensitive_handler(message: types.Message):
-
-    text = message.text.lower()
-    if "крутка" not in text and "лудка" not in text:
-        return
-
     rules = await get_chat_rules_dict(message.chat.id)
     if rules is not None and rules['m_slots'] == 0:
         mes = await message.reply("❌ Слоты отключены в этом чате")
@@ -23,25 +17,25 @@ async def fortuna_case_insensitive_handler(message: types.Message):
         create_task(remove_mes(mes, 10))
         return
 
-    async def proces_execute():
+    async def process_execute(msg: types.Message, thread_id: int):
         stack_of_loot = []
         keyword = None
         mes_ = None
 
-        rules_ = await get_chat_rules_dict(message.chat.id)
+        rules_ = await get_chat_rules_dict(msg.chat.id)
         min_balance = -500 if rules_ is None else rules_['min_balance']
 
-        if await get_balance(message.from_user.id) <= min_balance:
-            mesige = await message.reply(
+        if await get_balance(msg.from_user.id) <= min_balance:
+            mesige = await msg.reply(
                 "Ты и так в долгах. Чертов капитализм!?"
                 f"\n Отправь {pickaxe} чтобы сходить на работу"
             )
             await remove_mes(mesige, remove_time - 30)
-            await remove_mes(message, remove_time - 30)
+            await remove_mes(msg, remove_time - 30)
             return
 
         try:
-            match = message.text.lower().split()
+            match = msg.text.lower().split()
 
             if "крутка" in match:
                 keyword = "крутка"
@@ -60,30 +54,31 @@ async def fortuna_case_insensitive_handler(message: types.Message):
             if num > 10:
                 num = 10
                 if keyword == "лудка":
-                    mes_ = await message.reply("Многовато чёт, десятки хватит")
+                    mes_ = await msg.reply("Многовато чёт, десятки хватит", message_thread_id=thread_id)
             elif num < 0:
                 num = 3
                 if keyword == "лудка":
-                    mes_ = await message.reply("Я воспринимаю только отрицательный баланс")
+                    mes_ = await msg.reply("Я воспринимаю только отрицательный баланс",message_thread_id=thread_id)
             else:
                 if keyword == "лудка":
-                    mes_ = await message.reply("Крутим, крутим!")
+                    mes_ = await msg.reply("Крутим, крутим!")
 
             for _ in range(num):
                 if keyword == "крутка":
-                    ludka = await message.answer_dice(emoji=casino)
+                    ludka = await msg.answer_dice(emoji=casino)
                 else:
-                    ludka = await message.reply_dice(emoji=casino, disable_notification=True)
+                    ludka = await msg.reply_dice(emoji=casino, disable_notification=True)
 
-                await check_loot(ludka, message.from_user.id, standard_dep)
+                await check_loot(ludka, msg.from_user.id, standard_dep)
                 stack_of_loot.append(ludka)
                 await sleep(dt)
 
             if keyword == "лудка" and mes_:
                 await mes_.delete()
 
+
         except Exception as e:
-            print(e)
+            logging.exception(e)
 
         finally:
             for i in stack_of_loot:
@@ -97,19 +92,11 @@ async def fortuna_case_insensitive_handler(message: types.Message):
 
             try:
                 create_task(remove_mes(message, remove_time))
-                connect = sqlite3.connect("../../members.db")
-                cursor = connect.cursor()
-                cursor.execute(
-                    "SELECT username FROM Players WHERE user_id = ?",
-                    (message.from_user.id,)
-                )
-                row = cursor.fetchone()
-                username = row[0] if row else "unknown"
-                connect.close()
-
-                logging.info(f"Запрос обработан! для пользователя:{username}")
+                logging.info(f"Запрос обработан! {getattr(msg.from_user, 'username', 'Unknown')}")
             except:
                 pass
 
     queue_id = (message.chat.id, message.message_thread_id or 0)
-    await queue_manager.add(queue_id, proces_execute)
+    await queue_manager.add(queue_id, process_execute, message, message.message_thread_id)
+
+

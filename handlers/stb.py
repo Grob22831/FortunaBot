@@ -2,7 +2,8 @@ import logging
 from aiogram import types
 import emoji
 from asyncio import sleep
-from _queue import  queue_manager
+from handlers._queue import  queue_manager
+
 throttling_time = 2
 Dice_time = 2
 remove_time = 60
@@ -40,7 +41,6 @@ async def remove_mes(message: types.Message, time: int):
         await message.delete()
     except Exception as e:
         logging.warning(f"Не удалось удалить сообщение: {e}")
-
 
 
 

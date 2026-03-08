@@ -53,7 +53,7 @@ def set_rules():
     # Проверяем, что сохранилось
     cursor.execute("SELECT * FROM Chats WHERE id = ?", (chat_id,))
     saved = cursor.fetchone()
-    connect.commit()
+    #connect.commit()
     connect.close()
     return jsonify({"status": "ok"})
 
@@ -85,8 +85,8 @@ def change_rules():
 @app.route("/take_data/<path:chat_id>", methods=["GET"])
 def get_chat_rules(chat_id):
     cursor, connect = connect_chats_db()
-    result =cursor.execute("SELECT * FROM Chats").fetchall()
-    cursor.execute("SELECT * FROM Chats WHERE id = ?", (int(chat_id),))  # id вместо chat_id
+    #result =cursor.execute("SELECT * FROM Chats").fetchall()
+    cursor.execute("SELECT * FROM Chats WHERE id = ?", (int(chat_id),))
     result = cursor.fetchone()
     connect.close()
     if result:
@@ -175,7 +175,7 @@ def get_spins(user_id):
     cursor, connect = connect_db()
     cursor.execute("SELECT spins FROM Players WHERE user_id = ?",( user_id,))
     result =cursor.fetchone()
-    connect.commit()
+    #connect.commit()
     connect.close()
     if result:
         return jsonify({"spins":result[0]})
@@ -188,7 +188,7 @@ def get_balance(user_id):
     cursor, connect = connect_db()
     cursor.execute("SELECT balance FROM Players WHERE user_id = ?",( user_id,))
     result =cursor.fetchone()
-    connect.commit()
+    #connect.commit()
     connect.close()
     if result:
         return jsonify({"balance":result[0]})
@@ -202,7 +202,7 @@ def get_users_list():
     result = ""
     for row in rows:
         result += f"Пользователь: {row[0]}, Баланс: {row[1]}, Крутки:{row[2]}\n"
-    connect.commit()
+    #connect.commit()
     connect.close()
     if result:
         return jsonify({"stats":result})

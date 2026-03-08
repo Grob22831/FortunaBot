@@ -136,7 +136,7 @@ async def change_chat_rules(rules: tuple):
     }
     session = await get_session()
     async with session.post(f"{syte_url}/change_rules", json=data) as resp:
-        return resp.json()
+        return await resp.json()
 
 
 

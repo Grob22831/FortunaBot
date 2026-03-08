@@ -16,19 +16,14 @@ class RequestQueue:
             asyncio.create_task(self.process_queue(queue_id))
 
     async def process_queue(self, queue_id):
-        while True:
-            if not self.queues[queue_id]:
-                self.processing[queue_id] = False
-                return
-
+        while self.queues[queue_id]:
             coro_func, args, kwargs = self.queues[queue_id].popleft()
-
             try:
                 await coro_func(*args, **kwargs)
             except Exception as e:
-                logging.error(f"Ошибка в очереди: {e}")
-
-            await asyncio.sleep(1)
+                logging.exception(f"Ошибка в очереди при обработке {coro_func.__name__}")
+            await asyncio.sleep(0.3)
+        self.processing[queue_id] = False
 
 
 queue_manager = RequestQueue()

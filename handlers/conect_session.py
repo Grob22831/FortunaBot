@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import aiohttp
+from aiohttp_socks import ProxyConnector
 import asyncio
 load_dotenv()
 
